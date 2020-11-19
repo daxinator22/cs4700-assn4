@@ -21,6 +21,13 @@ try(Row, Column, NextRow, NextColumn) :- NextRow is Row, NextColumn is Column - 
 printCell(Maze, _, Row, Column) :- maze(Maze, Row, Column, barrier), write('x').
 printCell(Maze, _, Row, Column) :- maze(Maze, Row, Column, open), write(' ').
 
+printList([]).
+printList([H|T]) :-
+	write(H),
+	nl,
+	printList(T).
+
+%Prints out the maze
 printMaze(Maze, List) :- 
 	loopMaze(Maze, List, 0, 1),
 	true.
