@@ -116,4 +116,24 @@ loopMaze(Maze, List, Row, Column) :-
 	NewCol is Column + 1,
 	loopMaze(Maze, List, Row, NewCol).
 
-solve(Maze) :- true.
+solve(Maze) :-
+	checkDown(Maze, List, 1, 1),
+	printList(List),
+	printMaze(Maze, List).
+
+checkDown(Maze, List, Row, Col) :-
+	mazeSize(Maze, MaxRow, _),
+	Row =:= MaxRow,
+	List = [List | [Row, Col]].
+
+checkDown(Maze, [], Row, Col) :-
+	maze(Maze, Row, Col, open),
+	NewRow is Row + 1,
+	NewList = [[Row, Col]],
+	checkDown(Maze, NewList, NewRow, Col).
+
+checkDown(Maze, List, Row, Col) :-
+	maze(Maze, Row, Col, open),
+	NewRow is Row + 1,
+	NewList = [List | [Row, Col]],
+	checkDown(Maze, NewList, NewRow, Col).
