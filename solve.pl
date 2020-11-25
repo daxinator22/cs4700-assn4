@@ -18,8 +18,9 @@ try(Row, Column, NextRow, NextColumn) :- NextRow is Row, NextColumn is Column - 
 %   prints a single cell in the maze.
 %
 %   Print a barrier.
-printCell(Maze, _, Row, Column) :- maze(Maze, Row, Column, barrier), write('x').
-printCell(Maze, _, Row, Column) :- maze(Maze, Row, Column, open), write(' ').
+printCell(Maze, List, Row, Column) :- maze(Maze, Row, Column, barrier), write('x').
+printCell(Maze, List, Row, Column) :- maze(Maze, Row, Column, open), member([Row, Column], List), write('*').
+printCell(Maze, List, Row, Column) :- maze(Maze, Row, Column, open), write(' ').
 
 printList([]).
 printList([H|T]) :-
@@ -34,12 +35,12 @@ printMaze(Maze, List) :-
 
 %Checks initial corner on bottom row
 loopMaze(Maze, List, Row, Column) :-
-	mazeSize(Maze, MaxRow, _),
+	mazeSize(Maze, MaxRow, MaxCol),
 	Row =:= MaxRow + 1,
 	Column =:= 1, 
 	write('+-'),
 	NewCol is Column + 1,
-	loopMaze(Maze, _, Row, NewCol).
+	loopMaze(Maze, List, Row, NewCol).
 
 %Checks last corner on bottom row
 loopMaze(Maze, List, Row, Column) :-
@@ -50,11 +51,11 @@ loopMaze(Maze, List, Row, Column) :-
 
 %Adds line on bottom row
 loopMaze(Maze, List, Row, Column) :-
-	mazeSize(Maze, MaxRow, _),
+	mazeSize(Maze, MaxRow, MaxCol),
 	Row =:= MaxRow + 1,
 	write('-'),
 	NewCol is Column + 1,
-	loopMaze(Maze, _, Row, NewCol).
+	loopMaze(Maze, List, Row, NewCol).
 
 %Checks initial corner on top row
 loopMaze(Maze, List, Row, Column) :-
@@ -62,7 +63,7 @@ loopMaze(Maze, List, Row, Column) :-
 	Column =:= 1,
 	write('+-'),
 	NewCol is Column + 1,
-	loopMaze(Maze, _, Row, NewCol).
+	loopMaze(Maze, List, Row, NewCol).
 
 %Checks last corner on top row
 loopMaze(Maze, List, Row, Column) :-
@@ -72,30 +73,30 @@ loopMaze(Maze, List, Row, Column) :-
 	write('-+'),
 	nl,
 	NewRow is Row + 1,
-	loopMaze(Maze, _, NewRow, 1).
+	loopMaze(Maze, List, NewRow, 1).
 
 %Adds initial line on top row
 loopMaze(Maze, List, Row, Column) :-
 	Row =:= 0,
 	write('-'),
 	NewCol is Column + 1,
-	loopMaze(Maze, _, Row, NewCol).
+	loopMaze(Maze, List, Row, NewCol).
 
 %Checks to see if the row is the max row
 loopMaze(Maze, List, Row, Column) :-
 	mazeSize(Maze, MaxRow, MaxCol),
 	MaxRow =:= Row,
 	MaxCol =:= Column,
-	printCell(Maze, _, Row, Column),
+	printCell(Maze, List, Row, Column),
 	write('|'),
 	NewRow is Row + 1
-	loopMaze(Maze, _, Row, 1).
+	loopMaze(Maze, List, Row, 1).
 
 %Checks to see if the col is the max column
 loopMaze(Maze, List, Row, Column) :-
-	mazeSize(Maze, _, MaxCol),
+	mazeSize(Maze, MaxRow, MaxCol),
 	MaxCol =:= Column,
-	printCell(Maze, _, Row, Column),
+	printCell(Maze, List, Row, Column),
 	write('|'),
 	nl,
 	NewRow is Row + 1,
@@ -105,13 +106,13 @@ loopMaze(Maze, List, Row, Column) :-
 loopMaze(Maze, List, Row, Column) :-
 	Column =:= 1,
 	write('|'),
-	printCell(Maze, _, Row, Column),
+	printCell(Maze, List, Row, Column),
 	NewCol is Column + 1,
 	loopMaze(Maze, List, Row, NewCol).
 
 %Normal recursive call
 loopMaze(Maze, List, Row, Column) :-
-	printCell(Maze, _, Row, Column),
+	printCell(Maze, List, Row, Column),
 	NewCol is Column + 1,
 	loopMaze(Maze, List, Row, NewCol).
 
