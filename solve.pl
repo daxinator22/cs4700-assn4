@@ -51,7 +51,8 @@ loopMaze(Maze, List, Row, Column) :-
 	mazeSize(Maze, MaxRow, MaxCol),
 	Row =:= MaxRow + 1,
 	Column =:= MaxCol,
-	write('-+').
+	write('-+'),
+	nl.
 
 %Adds line on bottom row
 loopMaze(Maze, List, Row, Column) :-
@@ -111,7 +112,7 @@ loopMaze(Maze, List, Row, Column) :-
 	Column =:= 1,
 	write('|'),
 	printCell(Maze, List, Row, Column),
-	NewCol is Column + 1,
+NewCol is Column + 1,
 	loopMaze(Maze, List, Row, NewCol).
 
 %Normal recursive call
@@ -122,44 +123,52 @@ loopMaze(Maze, List, Row, Column) :-
 
 %Solves the maze
 solve(Maze) :-
-	check(Maze, List),
+	isPath(Maze, [], 1, 1, List),
 	printList(List),
 	printMaze(Maze, List).
 
-check(Maze, List) :-
-	moveDown(Maze, List, 1, 2).
+isPath(Maze, List, Row, Col, Path) :-
+	mazeSize(Maze, MaxRow, MaxCol),
+	Row =:= MaxRow,
+	Col =:= MaxCol,
+	append(List, [[Row, Col]], Path).
 
-moveDown(Maze, List, Row, Col) :- move(Maze, List, Row, Col, 1, 0).
-moveRight(Maze, List, Row, Col) :- move(Maze, List, Row, Col, 0, 1).
-moveUp(Maze, List, Row, Col) :- move(Maze, List, Row, Col, -1, 0).
-moveLeft(Maze, List, Row, Col) :- move(Maze, List, Row, Col, 0, -1).
+isPath(Maze, List, Row, Col, Path) :-
+	append(List, [[Row, Col]], NewList),
+	canMoveDown(Maze, NewList, Row, Col, NewRow, NewCol),
+	\+ member([NewRow, NewCol], List),
+	isPath(Maze, NewList, NewRow, NewCol, Path).
 
-%If falls of least row
-move(Maze, List, Row, Col, RowMove, ColMove) :-
-	Row < 1.
+isPath(Maze, List, Row, Col, Path) :-
+	append(List, [[Row, Col]], NewList),
+	canMoveRight(Maze, NewList, Row, Col, NewRow, NewCol),
+	\+ member([NewRow, NewCol], List),
+	isPath(Maze, NewList, NewRow, NewCol, Path).
 
-%If falls of least column
-move(Maze, List, Row, Col, RowMove, ColMove) :-
-	Col < 1.
+isPath(Maze, List, Row, Col, Path) :-
+	append(List, [[Row, Col]], NewList),
+	canMoveLeft(Maze, NewList, Row, Col, NewRow, NewCol),
+	\+ member([NewRow, NewCol], List),
+	isPath(Maze, NewList, NewRow, NewCol, Path).
 
-%If falls of max row
-move(Maze, List, Row, Col, RowMove, ColMove) :-
-	mazeSize(Maze, MaxRow, _),
-	Row > MaxRow.
+isPath(Maze, List, Row, Col, Path) :-
+	append(List, [[Row, Col]], NewList),
+	canMoveUp(Maze, NewList, Row, Col, NewRow, NewCol),
+	\+ member([NewRow, NewCol], List),
+	isPath(Maze, NewList, NewRow, NewCol, Path).
 
-%If falls of max column
-move(Maze, List, Row, Col, RowMove, ColMove) :-
-	mazeSize(Maze, _, MaxCol),
-	Col > MaxCol.
+canMoveDown(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, 1, 0, NewRow, NewCol).
+canMoveLeft(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, 0, -1, NewRow, NewCol).
+canMoveUp(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, -1, 0, NewRow, NewCol).
+canMoveRight(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, 0, 1, NewRow, NewCol).
 
-%If space is barrier
-move(Maze, List, Row, Col, RowMove, ColMove) :- maze(Maze, Row, Col, barrier), List = [].
-
-%Can move in any given direction
-move(Maze, List, Row, Col, RowMove, ColMove) :-
-	maze(Maze, Row, Col, open),
+canMove(Maze, List, Row, Col, RowMove, ColMove, NewRow, NewCol) :-
 	NewCol is Col + ColMove,
 	NewRow is Row + RowMove,
-	move(Maze, NewList, NewRow, NewCol, RowMove, ColMove),
-	append([[Row, Col]], NewList, List).
+	NewRow >= 1,
+	NewCol >= 1,
+	mazeSize(Maze, MaxRow, MaxCol),
+	NewRow =< MaxRow,
+	NewCol =< MaxCol,
+	maze(Maze, NewRow, NewCol, open).
 
