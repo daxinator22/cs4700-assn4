@@ -112,7 +112,7 @@ loopMaze(Maze, List, Row, Column) :-
 	Column =:= 1,
 	write('|'),
 	printCell(Maze, List, Row, Column),
-NewCol is Column + 1,
+	NewCol is Column + 1,
 	loopMaze(Maze, List, Row, NewCol).
 
 %Normal recursive call
@@ -127,41 +127,48 @@ solve(Maze) :-
 	printList(List),
 	printMaze(Maze, List).
 
+%If the path has reached the goal
 isPath(Maze, List, Row, Col, Path) :-
 	mazeSize(Maze, MaxRow, MaxCol),
 	Row =:= MaxRow,
 	Col =:= MaxCol,
 	append(List, [[Row, Col]], Path).
 
+%Checks to see if vaild path down
 isPath(Maze, List, Row, Col, Path) :-
 	append(List, [[Row, Col]], NewList),
 	canMoveDown(Maze, NewList, Row, Col, NewRow, NewCol),
 	\+ member([NewRow, NewCol], List),
 	isPath(Maze, NewList, NewRow, NewCol, Path).
 
+%Checks to see if vaild path right
 isPath(Maze, List, Row, Col, Path) :-
 	append(List, [[Row, Col]], NewList),
 	canMoveRight(Maze, NewList, Row, Col, NewRow, NewCol),
 	\+ member([NewRow, NewCol], List),
 	isPath(Maze, NewList, NewRow, NewCol, Path).
 
+%Checks to see if vaild path left
 isPath(Maze, List, Row, Col, Path) :-
 	append(List, [[Row, Col]], NewList),
 	canMoveLeft(Maze, NewList, Row, Col, NewRow, NewCol),
 	\+ member([NewRow, NewCol], List),
 	isPath(Maze, NewList, NewRow, NewCol, Path).
 
+%Checks to see if vaild path up
 isPath(Maze, List, Row, Col, Path) :-
 	append(List, [[Row, Col]], NewList),
 	canMoveUp(Maze, NewList, Row, Col, NewRow, NewCol),
 	\+ member([NewRow, NewCol], List),
 	isPath(Maze, NewList, NewRow, NewCol, Path).
 
+%Shortcuts for canMove
 canMoveDown(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, 1, 0, NewRow, NewCol).
 canMoveLeft(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, 0, -1, NewRow, NewCol).
 canMoveUp(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, -1, 0, NewRow, NewCol).
 canMoveRight(Maze, List, Row, Col, NewRow, NewCol) :- canMove(Maze, List, Row, Col, 0, 1, NewRow, NewCol).
 
+%Checks to see if point is in bounds and is open
 canMove(Maze, List, Row, Col, RowMove, ColMove, NewRow, NewCol) :-
 	NewCol is Col + ColMove,
 	NewRow is Row + RowMove,
