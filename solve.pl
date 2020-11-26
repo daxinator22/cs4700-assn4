@@ -18,6 +18,10 @@ try(Row, Column, NextRow, NextColumn) :- NextRow is Row, NextColumn is Column - 
 %   prints a single cell in the maze.
 %
 %   Print a barrier.
+
+getNumbers(Start, End, List) :- Start =:= End, append([[Start, End]], [], List).
+getNumbers(Start, End, List) :- NewStart is Start + 1, getNumbers(NewStart, End, NewList), append([[Start, End]], NewList, List).
+
 printCell(Maze, List, Row, Column) :- maze(Maze, Row, Column, barrier), write('x').
 printCell(Maze, List, Row, Column) :- maze(Maze, Row, Column, open), member([Row, Column], List), write('*').
 printCell(Maze, List, Row, Column) :- maze(Maze, Row, Column, open), write(' ').
@@ -116,24 +120,46 @@ loopMaze(Maze, List, Row, Column) :-
 	NewCol is Column + 1,
 	loopMaze(Maze, List, Row, NewCol).
 
+%Solves the maze
 solve(Maze) :-
-	checkDown(Maze, List, 1, 1),
+	check(Maze, List),
 	printList(List),
 	printMaze(Maze, List).
 
-checkDown(Maze, List, Row, Col) :-
+check(Maze, List) :-
+	moveDown(Maze, List, 1, 2).
+
+moveDown(Maze, List, Row, Col) :- move(Maze, List, Row, Col, 1, 0).
+moveRight(Maze, List, Row, Col) :- move(Maze, List, Row, Col, 0, 1).
+moveUp(Maze, List, Row, Col) :- move(Maze, List, Row, Col, -1, 0).
+moveLeft(Maze, List, Row, Col) :- move(Maze, List, Row, Col, 0, -1).
+
+%If falls of least row
+move(Maze, List, Row, Col, RowMove, ColMove) :-
+	Row < 1.
+
+%If falls of least column
+move(Maze, List, Row, Col, RowMove, ColMove) :-
+	Col < 1.
+
+%If falls of max row
+move(Maze, List, Row, Col, RowMove, ColMove) :-
 	mazeSize(Maze, MaxRow, _),
-	Row =:= MaxRow,
-	List = [List | [Row, Col]].
+	Row > MaxRow.
 
-checkDown(Maze, [], Row, Col) :-
-	maze(Maze, Row, Col, open),
-	NewRow is Row + 1,
-	NewList = [[Row, Col]],
-	checkDown(Maze, NewList, NewRow, Col).
+%If falls of max column
+move(Maze, List, Row, Col, RowMove, ColMove) :-
+	mazeSize(Maze, _, MaxCol),
+	Col > MaxCol.
 
-checkDown(Maze, List, Row, Col) :-
+%If space is barrier
+move(Maze, List, Row, Col, RowMove, ColMove) :- maze(Maze, Row, Col, barrier), List = [].
+
+%Can move in any given direction
+move(Maze, List, Row, Col, RowMove, ColMove) :-
 	maze(Maze, Row, Col, open),
-	NewRow is Row + 1,
-	NewList = [List | [Row, Col]],
-	checkDown(Maze, NewList, NewRow, Col).
+	NewCol is Col + ColMove,
+	NewRow is Row + RowMove,
+	move(Maze, NewList, NewRow, NewCol, RowMove, ColMove),
+	append([[Row, Col]], NewList, List).
+
